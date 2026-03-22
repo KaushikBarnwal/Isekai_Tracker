@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@source "../../templates";
+
+/* You can add your custom Isekai styles here */
+@theme {
+  --color-isekai-gold: #ffcc00;
+  --color-mana-blue: #00d4ff;
+}

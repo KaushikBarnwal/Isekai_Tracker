@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12 pt-20">
+
+    <!-- HEADER -->
+    <div class="mb-12 flex flex-col md:flex-row items-center justify-between">
+        <div class="flex items-center gap-4 mb-4 md:mb-0">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(245,158,11,0.15)]">
+                📜
+            </div>
+            <div>
+                <h1 class="text-3xl font-black tracking-tight text-white">The Chronicles</h1>
+                <p class="text-slate-500 text-sm font-medium tracking-wide">Your legend, written in the stars</p>
+            </div>
+        </div>
+        <a href="{% url 'dashboard' %}" class="bg-slate-900/80 backdrop-blur-xl px-5 py-2.5 rounded-2xl border border-white/10 shadow-xl text-indigo-400 hover:text-indigo-300 hover:border-indigo-500/30 transition-all duration-300 text-sm font-bold tracking-wide flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Stronghold
+        </a>
+    </div>
+
+    <!-- ARC-BASED GALLERY -->
+    {% for region_name, arc in arcs.items %}
+    <div class="mb-16">
+
+        <!-- ARC HEADER -->
+        <div class="relative mb-8">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
+            <div class="relative flex justify-center">
+                <div class="bg-slate-950 px-6 py-3 rounded-2xl border border-white/10 shadow-2xl">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🗺️</span>
+                        <div>
+                            <p class="text-amber-400 font-black tracking-widest uppercase text-xs">{{ arc.region }}</p>
+                            <p class="text-white font-bold text-sm">{{ arc.location }}</p>
+                        </div>
+                        <span class="bg-slate-800 text-slate-400 text-[10px] font-bold px-2.5 py-1 rounded-full ml-2">{{ arc.stories|length }} {% if arc.stories|length == 1 %}Entry{% else %}Entries{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STORY ENTRIES -->
+        <div class="space-y-6">
+            {% for log in arc.stories %}
+            <div class="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-[0_15px_40px_rgba(79,70,229,0.15)] hover:border-indigo-500/20 group">
+                <div class="flex flex-col md:flex-row">
+                    
+                    <!-- IMAGE (Left) -->
+                    <div class="md:w-[40%] relative overflow-hidden">
+                        {% if log.image_url %}
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-slate-900/80 z-10 hidden md:block"></div>
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent z-10 md:hidden"></div>
+                            <img src="{{ log.image_url }}" alt="Adventure Scene" class="h-64 md:h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                        {% else %}
+                            <div class="h-64 md:h-full bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 flex items-center justify-center min-h-[16rem]">
+                                <div class="text-center">
+                                    <div class="text-5xl mb-3 opacity-20">🌫️</div>
+                                    <span class="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-600">Image Lost in the Void</span>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Level Badge -->
+                        <div class="absolute top-4 left-4 z-20 bg-black/60 backdrop-blur-xl border border-amber-500/40 rounded-xl px-3 py-1.5 shadow-lg">
+                            <span class="text-[9px] text-amber-500 font-black uppercase tracking-widest block text-center">Lv</span>
+                            <span class="text-xl font-black text-white leading-none text-center block">{{ log.level_at_time }}</span>
+                        </div>
+                    </div>
+
+                    <!-- CONTENT (Right) -->
+                    <div class="md:w-[60%] p-6 md:p-8 flex flex-col">
+
+                        <!-- META BAR: Date + Stats -->
+                        <div class="flex flex-wrap items-center gap-2 mb-5">
+                            <span class="px-3 py-1 rounded-full bg-indigo-950/80 text-indigo-300 text-[10px] font-bold tracking-widest uppercase border border-indigo-500/20">
+                                📅 {{ log.date }}
+                            </span>
+                            {% if log.steps_taken %}
+                            <span class="px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-300 text-[10px] font-bold tracking-widest uppercase border border-emerald-500/20">
+                                👟 {{ log.steps_taken }} Steps
+                            </span>
+                            {% endif %}
+                            {% if log.exp_gained %}
+                            <span class="px-3 py-1 rounded-full bg-amber-950/80 text-amber-300 text-[10px] font-bold tracking-widest uppercase border border-amber-500/20">
+                                ✨ +{{ log.exp_gained }} EXP
+                            </span>
+                            {% endif %}
+                            {% if log.found_item_name %}
+                            <span class="px-3 py-1 rounded-full bg-purple-950/80 text-purple-300 text-[10px] font-bold tracking-widest uppercase border border-purple-500/20">
+                                🎁 {{ log.found_item_name }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- SUMMARY TITLE -->
+                        <h2 class="text-xl font-extrabold text-white mb-4 leading-tight">
+                            {{ log.memory_summary }}
+                        </h2>
+                        
+                        <!-- STORY BODY -->
+                        <div class="relative pl-5 flex-grow">
+                            <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-500/60 to-purple-500/20 rounded-full"></div>
+                            <p class="text-slate-400 leading-relaxed text-sm">
+                                {{ log.content|linebreaksbr }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% empty %}
+    <!-- EMPTY STATE -->
+    <div class="py-24 text-center relative">
+        <div class="bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-[2rem] p-12 shadow-2xl relative overflow-hidden max-w-xl mx-auto">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
+            <div class="relative z-10">
+                <span class="text-7xl mb-6 block opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700 cursor-default">📖</span>
+                <h3 class="text-2xl font-black text-white mb-3 tracking-tight">The Pages Are Blank</h3>
+                <p class="text-slate-500 max-w-sm mx-auto text-sm leading-relaxed mb-8">No chronicles have been written yet. Return to the Stronghold and begin walking to forge your legend!</p>
+                <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 font-bold border border-amber-500/30 hover:border-amber-500/50 rounded-xl px-6 py-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] text-sm tracking-wide">
+                    ⚔️ Return to Stronghold
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
