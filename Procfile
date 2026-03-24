@@ -1,1 +1,1 @@
-web: mkdir -p staticfiles && python manage.py collectstatic --noinput && python manage.py migrate && gunicorn isekai_tracker.wsgi --log-file
+web: mkdir -p staticfiles && python manage.py migrate && gunicorn isekai_tracker.wsgi --log-file
