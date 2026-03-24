@@ -1,1 +1,1 @@
-web: gunicorn isekai_tracker.wsgi --log-file -
+web: python manage.py collectstatic --noinput && python manage.py migrate && gunicorn isekai_tracker.wsgi --log-file
