@@ -1,8 +1,261 @@
 @import "tailwindcss";
 @source "../../templates";
 
-/* You can add your custom Isekai styles here */
+/* ═══════════════════════════════════════════════
+   ISEKAI TRACKER — RPG DESIGN SYSTEM
+   ═══════════════════════════════════════════════ */
+
 @theme {
-  --color-isekai-gold: #ffcc00;
-  --color-mana-blue: #00d4ff;
+  --color-isekai-gold: #d4a017;
+  --color-mana-blue: #3b82f6;
+  --color-blood-red: #dc2626;
+  --color-parchment: #f5e6c8;
+  --color-parchment-dark: #e8d5a8;
+  --color-ink: #2c1810;
+  --color-leather: #5c3a1e;
+  --font-heading: "Cinzel", "Georgia", serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* ─── DARK THEME (default) ─── */
+[data-theme="dark"] {
+  --rpg-bg: #0a0a0f;
+  --rpg-bg-translucent: rgba(10, 10, 15, 0.92);
+  --rpg-surface: #111118;
+  --rpg-surface-elevated: #1a1a24;
+  --rpg-border: #2a2a3a;
+  --rpg-border-accent: #3d3520;
+  --rpg-text: #d4d0c8;
+  --rpg-text-muted: #7a7770;
+  --rpg-text-heading: #f0e8d8;
+  --rpg-accent: #d4a017;
+  --rpg-accent-dim: rgba(212, 160, 23, 0.15);
+  --rpg-glow: rgba(212, 160, 23, 0.08);
+  --rpg-nav-bg: #0d0d14;
+  --rpg-nav-border: #2a2a3a;
+  --rpg-card-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  --rpg-input-bg: rgba(15, 15, 22, 0.8);
+}
+
+/* ─── LIGHT THEME ─── */
+[data-theme="light"] {
+  --rpg-bg: #f5e6c8;
+  --rpg-bg-translucent: rgba(245, 230, 200, 0.92);
+  --rpg-surface: #efe0c4;
+  --rpg-surface-elevated: #faf3e4;
+  --rpg-border: #c4a870;
+  --rpg-border-accent: #a08040;
+  --rpg-text: #3d2e1a;
+  --rpg-text-muted: #7a6645;
+  --rpg-text-heading: #2c1810;
+  --rpg-accent: #8b6914;
+  --rpg-accent-dim: rgba(139, 105, 20, 0.12);
+  --rpg-glow: rgba(139, 105, 20, 0.06);
+  --rpg-nav-bg: #e8d5a8;
+  --rpg-nav-border: #c4a870;
+  --rpg-card-shadow: 0 4px 20px rgba(92, 58, 30, 0.12);
+  --rpg-input-bg: rgba(250, 243, 228, 0.9);
+}
+
+/* ─── BASE STYLES ─── */
+body {
+  background-color: var(--rpg-bg);
+  color: var(--rpg-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─── RPG PANEL ─── */
+.rpg-panel {
+  background: var(--rpg-surface);
+  border: 1px solid var(--rpg-border);
+  border-radius: 4px;
+  box-shadow: var(--rpg-card-shadow);
+  position: relative;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.rpg-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--rpg-accent), transparent);
+  opacity: 0.5;
+  border-radius: 4px 4px 0 0;
+}
+
+/* ─── RPG NAVBAR ─── */
+.rpg-nav {
+  background: var(--rpg-nav-bg);
+  border-bottom: 2px solid var(--rpg-border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+[data-theme="dark"] .rpg-nav {
+  border-image: linear-gradient(90deg, transparent, #3d3520, #d4a017, #3d3520, transparent) 1;
+}
+
+[data-theme="light"] .rpg-nav {
+  border-image: linear-gradient(90deg, transparent, #c4a870, #8b6914, #c4a870, transparent) 1;
+}
+
+/* ─── RPG BUTTON ─── */
+.rpg-btn {
+  border-radius: 3px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.rpg-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.rpg-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.15);
+}
+
+/* ─── STAT BAR (chunky RPG) ─── */
+.stat-bar-track {
+  height: 18px;
+  background: var(--rpg-surface);
+  border: 2px solid var(--rpg-border);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+[data-theme="dark"] .stat-bar-track {
+  background: #0a0a12;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 0;
+  position: relative;
+  transition: width 1s ease;
+}
+
+.stat-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent);
+}
+
+/* ─── HEADING FONT ─── */
+.font-rpg {
+  font-family: var(--font-heading);
+}
+
+/* ─── RPG TEXT COLORS (theme aware) ─── */
+.rpg-heading { color: var(--rpg-text-heading); }
+.rpg-muted { color: var(--rpg-text-muted); }
+.rpg-accent-text { color: var(--rpg-accent); }
+
+/* ─── THEME TOGGLE BUTTON ─── */
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--rpg-border);
+  border-radius: 3px;
+  background: var(--rpg-surface);
+  color: var(--rpg-accent);
+  cursor: pointer;
+  font-size: 1.15rem;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--rpg-accent);
+  background: var(--rpg-accent-dim);
+  transform: translateY(-1px);
+}
+
+/* ─── RPG TAG ─── */
+.rpg-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border: 1px solid;
+}
+
+/* ─── RPG CORNER ORNAMENTS (for hero panels) ─── */
+.rpg-ornament {
+  position: relative;
+}
+
+.rpg-ornament::before,
+.rpg-ornament::after {
+  content: '◆';
+  position: absolute;
+  color: var(--rpg-accent);
+  opacity: 0.4;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.rpg-ornament::before { top: 8px; left: 10px; }
+.rpg-ornament::after { top: 8px; right: 10px; }
+
+/* ─── FORM INPUT OVERRIDES ─── */
+[data-theme="light"] form input,
+[data-theme="light"] form select,
+[data-theme="light"] form textarea {
+  background-color: rgba(250, 243, 228, 0.9) !important;
+  border-color: #c4a870 !important;
+  color: #2c1810 !important;
+}
+
+[data-theme="light"] form input:focus,
+[data-theme="light"] form select:focus {
+  border-color: #8b6914 !important;
+  box-shadow: 0 0 0 2px rgba(139, 105, 20, 0.2) !important;
+}
+
+[data-theme="light"] form label {
+  color: #5c3a1e !important;
+}
+
+/* ─── SCROLLBAR RPG STYLE ─── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--rpg-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--rpg-border);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--rpg-accent);
+}
+
+/* ─── SHIMMER ANIMATION ─── */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
 }

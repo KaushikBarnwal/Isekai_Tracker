@@ -1,70 +1,107 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/output.css' %}?v={% now 'U' %}">
-    <title>Isekai Tracker - Your Legend Awaits</title>
+    <title>Isekai Tracker — Your Legend Awaits</title>
+    <script>
+        // Apply saved theme BEFORE render to prevent flash
+        (function() {
+            const saved = localStorage.getItem('isekai-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
 </head>
-<body class="bg-slate-950 text-slate-200 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500/30">
+<body class="min-h-screen flex flex-col antialiased">
     <!-- Navbar -->
-    <nav class="sticky top-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-white/5 shadow-2xl">
+    <nav class="rpg-nav sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex items-center justify-between h-14">
                 <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center gap-3">
-                    <span class="text-2xl drop-shadow-[0_0_10px_rgba(167,139,250,0.5)]">⚔️</span>
-                    <a href="{% url 'dashboard' %}" class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent hover:from-indigo-300 hover:to-purple-300 transition-all duration-300">
+                <div class="flex-shrink-0 flex items-center gap-2.5">
+                    <span class="text-xl">⚔️</span>
+                    <a href="{% url 'dashboard' %}" class="font-rpg text-lg font-bold tracking-wide rpg-accent-text hover:brightness-125 transition-all duration-200">
                         Isekai Tracker
                     </a>
                 </div>
                 <!-- Links (Desktop) -->
-                <div class="hidden md:flex space-x-2 items-center">
+                <div class="hidden md:flex items-center gap-1">
                     {% url 'dashboard' as url_dashboard %}
                     <a href="{{ url_dashboard }}" 
-                        class="flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 {% if request.path == url_dashboard %}bg-slate-800 text-indigo-400 border border-indigo-500/30 shadow-lg font-bold transform scale-105{% else %}text-slate-300 hover:text-white hover:bg-white/10 border border-transparent{% endif %}">
+                        class="rpg-btn px-4 py-1.5 text-xs {% if request.path == url_dashboard %}rpg-accent-text border-2{% else %}rpg-muted border border-transparent hover:border-current{% endif %}"
+                        style="{% if request.path == url_dashboard %}background:var(--rpg-accent-dim);border-color:var(--rpg-accent);{% endif %}">
                         Stronghold
                     </a>
                     {% url 'inventory' as url_inventory %}
                     <a href="{{ url_inventory }}" 
-                        class="flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 {% if request.path == url_inventory %}bg-slate-800 text-emerald-400 border border-emerald-500/30 shadow-lg font-bold transform scale-105{% else %}text-slate-300 hover:text-white hover:bg-white/10 border border-transparent{% endif %}">
+                        class="rpg-btn px-4 py-1.5 text-xs {% if request.path == url_inventory %}text-emerald-400 border-2 border-emerald-500/40 bg-emerald-500/10{% else %}rpg-muted border border-transparent hover:border-current{% endif %}">
                         Inventory
                     </a>
                     {% url 'adventure_log' as url_adventure_log %}
                     <a href="{{ url_adventure_log }}" 
-                        class="flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 {% if request.path == url_adventure_log %}bg-slate-800 text-purple-400 border border-purple-500/30 shadow-lg font-bold transform scale-105{% else %}text-slate-300 hover:text-white hover:bg-white/10 border border-transparent{% endif %}">
+                        class="rpg-btn px-4 py-1.5 text-xs {% if request.path == url_adventure_log %}text-purple-400 border-2 border-purple-500/40 bg-purple-500/10{% else %}rpg-muted border border-transparent hover:border-current{% endif %}">
                         Chronicles
                     </a>
                     {% if user.is_authenticated %}
-                    <form action="{% url 'logout' %}" method="post" class="inline">
+                    <form action="{% url 'logout' %}" method="post" class="inline ml-2">
                         {% csrf_token %}
-                        <button type="submit" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-4 py-2 rounded-xl font-medium transition duration-200 ml-4 border border-rose-500/0 hover:border-rose-500/30">
-                            Log out
+                        <button type="submit" class="rpg-btn px-3 py-1.5 text-xs text-rose-400 border border-transparent hover:border-rose-500/40 hover:bg-rose-500/10">
+                            Log Out
                         </button>
                     </form>
                     {% endif %}
+
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="theme-toggle ml-3" title="Toggle Theme" aria-label="Toggle dark/light theme">
+                        <span id="theme-icon">🌙</span>
+                    </button>
+                </div>
+
+                <!-- Mobile: Theme toggle + hamburger placeholder -->
+                <div class="md:hidden flex items-center gap-2">
+                    <button id="theme-toggle-mobile" class="theme-toggle" title="Toggle Theme" aria-label="Toggle dark/light theme">
+                        <span id="theme-icon-mobile">🌙</span>
+                    </button>
                 </div>
             </div>
         </div>
+
+        <!-- Mobile Nav Links -->
+        <div class="md:hidden border-t" style="border-color: var(--rpg-border);">
+            <div class="px-4 py-2 flex flex-wrap gap-1">
+                {% url 'dashboard' as url_dashboard %}
+                <a href="{{ url_dashboard }}" class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_dashboard %}rpg-accent-text{% else %}rpg-muted{% endif %}" {% if request.path == url_dashboard %}style="background:var(--rpg-accent-dim);border:1px solid var(--rpg-accent);"{% endif %}>Stronghold</a>
+                {% url 'inventory' as url_inventory %}
+                <a href="{{ url_inventory }}" class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_inventory %}text-emerald-400 border border-emerald-500/40 bg-emerald-500/10{% else %}rpg-muted{% endif %}">Inventory</a>
+                {% url 'adventure_log' as url_adventure_log %}
+                <a href="{{ url_adventure_log }}" class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_adventure_log %}text-purple-400 border border-purple-500/40 bg-purple-500/10{% else %}rpg-muted{% endif %}">Chronicles</a>
+                {% if user.is_authenticated %}
+                <form action="{% url 'logout' %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="rpg-btn px-3 py-1.5 text-xs text-rose-400">Log Out</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
     </nav>
-    
+
     <!-- Main Content -->
     <main class="flex-grow w-full relative">
-        <!-- Abstract Background Glows -->
-        <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-purple-600/10 rounded-full blur-[150px] -z-10 pointer-events-none"></div>
-
         <!-- Messages -->
         {% if messages %}
-        <div class="max-w-4xl mx-auto px-4 mt-6 absolute w-full left-1/2 -translate-x-1/2 z-40">
+        <div class="max-w-4xl mx-auto px-4 mt-4 absolute w-full left-1/2 -translate-x-1/2 z-40">
             {% for message in messages %}
-            <div class="p-4 mb-4 rounded-2xl border backdrop-blur-md shadow-2xl flex items-center gap-3 transform transition-all duration-500 hover:-translate-y-1
-                {% if message.tags == 'success' %}bg-green-900/40 border-green-500/50 text-green-100
-                {% elif message.tags == 'error' %}bg-red-900/40 border-red-500/50 text-red-100
-                {% else %}bg-indigo-900/40 border-indigo-500/50 text-indigo-100{% endif %}">
-                <span class="text-xl">{% if message.tags == 'success' %}✨{% elif message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}</span>
-                <span class="font-medium tracking-wide">{{ message }}</span>
+            <div class="rpg-panel p-4 mb-3 flex items-center gap-3
+                {% if message.tags == 'success' %} border-emerald-600
+                {% elif message.tags == 'error' %} border-rose-600
+                {% else %} border-amber-600{% endif %}">
+                <span class="text-lg">{% if message.tags == 'success' %}✨{% elif message.tags == 'error' %}⚠️{% else %}ℹ️{% endif %}</span>
+                <span class="text-sm font-medium tracking-wide">{{ message }}</span>
             </div>
             {% endfor %}
         </div>
@@ -73,12 +110,39 @@
         {% block content %}
         {% endblock %}
     </main>
-    
+
     <!-- Footer -->
-    <footer class="mt-auto py-8 border-t border-white/5 bg-slate-900/30 backdrop-blur">
-        <div class="max-w-6xl mx-auto px-4 text-center text-sm text-slate-500 font-medium tracking-wide">
-            <p>&copy; 2026 The Adventurer's Guild. Your legend is being recorded.</p>
+    <footer class="mt-auto py-6" style="border-top: 2px solid var(--rpg-border); background: var(--rpg-surface);">
+        <div class="max-w-6xl mx-auto px-4 text-center text-xs rpg-muted font-rpg tracking-widest uppercase">
+            <p>&copy; 2026 The Adventurer's Guild ◆ Your legend is being recorded</p>
         </div>
     </footer>
+
+    <!-- Theme Toggle Script -->
+    <script>
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('isekai-theme', theme);
+            const icon = theme === 'dark' ? '🌙' : '☀️';
+            const el1 = document.getElementById('theme-icon');
+            const el2 = document.getElementById('theme-icon-mobile');
+            if (el1) el1.textContent = icon;
+            if (el2) el2.textContent = icon;
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        }
+
+        // Set initial icon state
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('isekai-theme') || 'dark';
+            setTheme(saved);
+        });
+
+        document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
+        document.getElementById('theme-toggle-mobile')?.addEventListener('click', toggleTheme);
+    </script>
 </body>
 </html>

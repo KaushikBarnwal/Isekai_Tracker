@@ -2,40 +2,39 @@
 
 {% block content %}
 <div class="min-h-[80vh] flex items-center justify-center px-4 relative z-10">
-    <div class="max-w-md w-full bg-slate-900/80 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[40px] -z-10"></div>
+    <div class="max-w-md w-full rpg-panel rpg-ornament p-7 relative overflow-hidden">
         
-        <div class="text-center mb-8">
-            <span class="text-5xl block mb-4">🔮</span>
-            <h2 class="text-3xl font-black text-white tracking-tight">Return to Stronghold</h2>
-            <p class="text-indigo-300 mt-2 font-medium">Log in to resume your journey.</p>
+        <div class="text-center mb-6 relative z-10">
+            <span class="text-4xl block mb-3">🔮</span>
+            <h2 class="font-rpg text-2xl font-bold rpg-heading tracking-wide">Return to Stronghold</h2>
+            <p class="rpg-accent-text mt-1.5 text-sm">Log in to resume your journey.</p>
         </div>
 
-        <form method="post" class="space-y-6">
+        <form method="post" class="space-y-5 relative z-10">
             {% csrf_token %}
             
-            <div class="space-y-4 text-slate-300">
+            <div class="space-y-3">
                 {{ form.as_p }}
             </div>
             
-            <button type="submit" class="w-full py-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-indigo-500 rounded-xl font-bold text-white text-lg shadow-lg hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] transition-all transform hover:-translate-y-1">
+            <button type="submit" class="rpg-btn w-full py-3 border-2 text-base rpg-heading tracking-widest font-rpg" style="background: var(--rpg-surface-elevated); border-color: var(--rpg-accent);">
                 Enter World
             </button>
             
             <input type="hidden" name="next" value="{{ next|default:'/dashboard/' }}">
         </form>
         
-        <p class="text-center mt-6 text-slate-400">
-            A new soul? <a href="{% url 'register' %}" class="text-amber-400 hover:text-amber-300 font-bold ml-1">Forge your destiny</a>
+        <p class="text-center mt-5 rpg-muted text-sm relative z-10">
+            A new soul? <a href="{% url 'register' %}" class="rpg-accent-text hover:brightness-125 font-bold ml-1">Forge your destiny</a>
         </p>
     </div>
 </div>
 
 <style>
-/* Quick Tailwind overrides for the Django form rendering */
-form p { margin-bottom: 1rem; }
-form label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 600; color: #cbd5e1; }
-form input { width: 100%; padding: 0.75rem 1rem; background-color: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 0.75rem; color: white; outline: none; transition: all 0.2s; }
-form input:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+/* RPG form overrides */
+form p { margin-bottom: 0.75rem; }
+form label { display: block; margin-bottom: 0.4rem; font-size: 0.8rem; font-weight: 600; color: var(--rpg-text-muted); font-family: var(--font-heading); text-transform: uppercase; letter-spacing: 0.1em; }
+form input { width: 100%; padding: 0.65rem 0.85rem; background-color: var(--rpg-input-bg); border: 2px solid var(--rpg-border); border-radius: 3px; color: var(--rpg-text); outline: none; transition: all 0.2s; font-size: 0.9rem; }
+form input:focus { border-color: var(--rpg-accent); box-shadow: 0 0 8px var(--rpg-glow); }
 </style>
 {% endblock %}

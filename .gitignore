@@ -5,3 +5,4 @@ package-lock.json
 package.json
 .vscode
 celerybeat-schedule*
+__pycache__
