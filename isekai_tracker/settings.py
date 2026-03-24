@@ -44,14 +44,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-x&v0dp91d#y5dv1p(868(4o^g$fp@ih=tma7!3lo^!q9iz&xpn'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = [
+    'web-production-a1e4b.up.railway.app',
+    'isekai-tracker.up.railway.app',
+    'localhost',
+    '127.0.0.1'
+]
 
 csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
-if csrf_origins:
-    CSRF_TRUSTED_ORIGINS = csrf_origins.split(',')
 
+if csrf_origins:
+    # .strip() removes accidental spaces, e.g., "site1.com, site2.com"
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',')]
+else:
+    # Default fallback so the site works on the original Railway URL
+    CSRF_TRUSTED_ORIGINS = ['https://web-production-a1e4b.up.railway.app']
+
+# This tells Django to trust the 'https' header sent by Railway
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -152,6 +164,7 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_REDIRECT_URL = 'dashboard'    
 LOGOUT_REDIRECT_URL = 'home'
