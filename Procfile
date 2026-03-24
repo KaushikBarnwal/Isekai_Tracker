@@ -1,1 +1,0 @@
-web: python manage.py migrate && gunicorn isekai_tracker.wsgi --log-file
