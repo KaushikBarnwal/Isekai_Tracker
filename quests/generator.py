@@ -78,7 +78,7 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
                     "content": narrative_prompt,
                 }
             ],
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             temperature=0.7,
         )
         raw_text = chat_completion.choices[0].message.content

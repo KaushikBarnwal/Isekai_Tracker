@@ -32,12 +32,19 @@ class FitService:
         start_ns = int(start_time.timestamp() * 1e9)    # Converted to nanoseconds (required by Google Fit API)
         end_ns = int(now.timestamp() * 1e9)
         dataset_id = f"{start_ns}-{end_ns}"
-        response = service.users().dataset().aggregate(userId='me', body={
-            "aggregateBy": [{"dataTypeName": "com.google.step_count.delta"}],
-            "bucketByTime": {"durationMillis": 86400000},   # Bucket by day (24 hours)
-            "startTimeMillis": int(start_time.timestamp() * 1000),
-            "endTimeMillis": int(now.timestamp() * 1000)
-        }).execute()
+        import socket
+        
+        default_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(10)
+        try:
+            response = service.users().dataset().aggregate(userId='me', body={
+                "aggregateBy": [{"dataTypeName": "com.google.step_count.delta"}],
+                "bucketByTime": {"durationMillis": 86400000},   # Bucket by day (24 hours)
+                "startTimeMillis": int(start_time.timestamp() * 1000),
+                "endTimeMillis": int(now.timestamp() * 1000)
+            }).execute()
+        finally:
+            socket.setdefaulttimeout(default_timeout)
 
         # try:
         #     steps = response['bucket'][0]['dataset'][0]['point'][0]['value'][0]['intVal']

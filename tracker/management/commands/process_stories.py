@@ -45,10 +45,10 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f"Successfully generated story for {pending_story.player.user.username}."))
                 
                 # Sleep to prevent GROQ API rate limits (Free Tier allows 15 RPM)
-                self.stdout.write("Sleeping 30 seconds to respect GROQ rate limits...")
-                time.sleep(30)
+                self.stdout.write("Sleeping 4 seconds to respect GROQ rate limits...")
+                time.sleep(4)
                 
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f"Error processing story ID {pending_story.id}: {str(e)}"))
-                self.stdout.write("Sleeping 30 seconds before trying the next one...")
-                time.sleep(30)
+                self.stdout.write("Sleeping 4 seconds before trying the next one...")
+                time.sleep(4)
