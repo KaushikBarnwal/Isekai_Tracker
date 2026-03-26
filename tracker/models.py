@@ -3,14 +3,14 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class DailyStepLog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)    # Changed: Removed auto_now_add=True so you can sync 'yesterday's' data if needed
+    user = models.ForeignKey(User, on_delete=models.CASCADE)    # Removed auto_now_add=True so can sync 'yesterday's' data if needed
     date = models.DateField()
     steps = models.PositiveIntegerField(default=0)
     distance_km = models.FloatField(default=0.0)
-    is_processed = models.BooleanField(default=False)           # To mark if the data is processed (checks new steps)
-    story_text = models.TextField(null=True, blank=True)        # Narrative Fields
-    story_image_url = models.URLField(max_length=500, null=True, blank=True) # Narrative Fields
-    level_at_time = models.PositiveIntegerField(default=1)      # Records what level you were that day
+    is_processed = models.BooleanField(default=False)           # To mark if data is processed (checks new steps)
+    story_text = models.TextField(null=True, blank=True)
+    story_image_url = models.URLField(max_length=500, null=True, blank=True)
+    level_at_time = models.PositiveIntegerField(default=1)
     
     class Meta:
         unique_together = ('user', 'date')                      # Ensure one data of log per user per day 

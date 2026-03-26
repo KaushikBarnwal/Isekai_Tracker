@@ -10,7 +10,7 @@ class DailyStory(models.Model):
     memory_summary = models.CharField(max_length=500)
     image_url = models.URLField(blank=True, null=True)
     level_at_time = models.PositiveIntegerField(default=1)
-    # Arc & Journey Metadata
+    # Arc & Journey
     world_region = models.CharField(max_length=100, blank=True, null=True)
     location_name = models.CharField(max_length=255, blank=True, null=True)
     steps_taken = models.PositiveIntegerField(default=0)

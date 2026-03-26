@@ -51,8 +51,7 @@ def check_for_loot(player_profile, steps):
             if not created:
                 inv_item.quantity += 1
                 inv_item.save()
-            # Keep track of the "best" item for the story mention
-            # (prioritize higher rarity if multiple items drop)
+            # prioritize higher rarity if multiple items drop (best item for the story mention)
             if best_item is None:
                 best_item = found_item
             else:
@@ -60,7 +59,7 @@ def check_for_loot(player_profile, steps):
                 if rarity_rank.get(found_item.rarity, 0) > rarity_rank.get(best_item.rarity, 0):
                     best_item = found_item
             if found_item:
-                # Check if the item is worth an email
+                # for sending an email
                 if found_item.rarity in ["Epic", "Legendary"] and player_profile.user.email:
                     send_loot_email(
                         user_email=player_profile.user.email,
@@ -104,7 +103,7 @@ def process_daily_steps(player_profile, step_log):
     while True:
         req_exp = calculate_required_exp(player_profile.level)
         if player_profile.exp >= req_exp:
-            # Level Up!
+            # Level Up
             player_profile.exp -= req_exp
             player_profile.level += 1
             player_profile.hp += 10
@@ -118,7 +117,7 @@ def process_daily_steps(player_profile, step_log):
                 logger.info(f"🗺️ DISCOVERY: Reached {player_profile.current_location}")
             # Store this milestone level for the queue
             levels_gained.append(player_profile.level)
-            # Save state before calling high-latency AI
+            # Save state before calling AI
             player_profile.save()
             print(f"--- ✨ Level Up! Now Level {player_profile.level}. Queuing Chapter... ---")
         else:
@@ -129,9 +128,9 @@ def process_daily_steps(player_profile, step_log):
     story_date = str(step_log.date)  # Serialize date
     # 5. Scheduling the Story Drip-Feed
     if any_level_up_occurred:
-        # Loop through each level gained and schedule a task
+        # Loop through each level gained & schedule a task
         for index, lv in enumerate(levels_gained):
-            delay_minutes = index * 15              # 15 minutes delay per level
+            delay_minutes = index * 15                  # 15 minutes delay per level
             run_at = timezone.now() + timedelta(minutes=delay_minutes)
             PendingStory.objects.create(
                 player=player_profile,
@@ -144,7 +143,7 @@ def process_daily_steps(player_profile, step_log):
                 scheduled_time=run_at
             )
             logger.info(f"⏲️ Saved PendingStory for Level {lv} scheduled at {run_at}.")
-    # 6. Daily Summary (If the player didn't level up at all)
+    # 6. Daily Summary (If player didn't level up at all)
     else:
         logger.info("📜 Saving PendingStory for daily adventure summary (no level up).")
         run_at = timezone.now()

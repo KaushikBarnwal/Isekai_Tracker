@@ -24,7 +24,6 @@ GROQ_CLIENT = Groq(api_key=settings.GROQ_API_KEY)
 def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_level=None, found_item=None, story_date=None):
     print(f"--- DEBUG: Starting Story Gen for Player {player_id} ---")
     player = PlayerProfile.objects.get(id=player_id)
-    # Fetch Equipped Gear
     equipped_items = InventoryItem.objects.filter(player=player, is_equipped=True).select_related('item')
     gear_names = [inv.item.name for inv in equipped_items]
     gear_context = ", ".join(gear_names) if gear_names else "basic travel rags and no weapons"
@@ -66,7 +65,7 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
     """
     
     print("--- DEBUG: Calling Groq API ---")
-    # Using Llama 3.3 70B for high quality, or Llama 3 8B for extreme speed
+    # Note for me: Llama 3.3 70B for high quality, or Llama 3 8B for extreme speed
     try:
         chat_completion = GROQ_CLIENT.chat.completions.create(
             messages=[
@@ -93,14 +92,13 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
         story_match = re.search(r"STORY:(.*?)SUMMARY:", raw_text, re.DOTALL | re.IGNORECASE)
         summary_match = re.search(r"SUMMARY:(.*?)ACTION:", raw_text, re.DOTALL | re.IGNORECASE)
         action_match = re.search(r"ACTION:(.*)", raw_text, re.DOTALL | re.IGNORECASE)
-        
         story_content = story_match.group(1).replace('#', '').replace('*', '').strip() if story_match else "The hero pushed forward."
         summary_content = summary_match.group(1).replace('#', '').replace('*', '').strip() if summary_match else "The journey continues."
         current_action = action_match.group(1).replace('#', '').replace('*', '').strip() if action_match else "exploring the world"
         
         # Fallback if story_match failed but raw_text exists
         if not story_match and len(raw_text) > 50:
-             story_content = raw_text[:500] 
+            story_content = raw_text[:500] 
     except Exception as e:
         print(f"--- ERROR: Parsing failed: {e} ---")
         story_content = f"The hero {player.user.username} pushed forward into the unknown."
@@ -113,7 +111,6 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
     
     dna_string = f"{player.visual_description}, wearing {gear_context}"
     prompt_text = f"{dna_string}, {current_action}, {player.current_location} background, anime style"
-    
     print("--- DEBUG: Calling Hugging Face API ---")
     hf_token = settings.HUGGINGFACE_API_KEY
     # Using FLUX.1-schnell for fast, high-quality generation

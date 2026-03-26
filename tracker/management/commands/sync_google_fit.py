@@ -12,7 +12,7 @@ class Command(BaseCommand):
     help = 'Fetches Google Fit steps for all connected players for the past 24 hours'
 
     def handle(self, *args, **options):
-        # We run this at midnight, so we are calculating "yesterday's" steps.
+        # Run at midnight, calculating yesterday's steps.
         target_date = date.today() - timedelta(days=1)
         self.stdout.write(f"Starting Automated Sync for Date: {target_date}")
         # Get all players connected to Google Fit
@@ -34,9 +34,9 @@ class Command(BaseCommand):
                 'client_secret': player.google_client_secret,
             }
             try:
-                # 1. Fetch steps from FitService (which pulls the last 24h by default)
+                # 1. Fetch steps from FitService (pulls the last 24h by default)
                 real_steps = FitService.get_steps(creds_dict)
-                # 2. Get or Create the Log for 'yesterday'
+                # 2. Get or Create the Log for yesterday
                 step_log, created = DailyStepLog.objects.get_or_create(
                     user=player.user,
                     date=target_date,
@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 if not step_log.is_processed:
                     step_log.steps = real_steps
                     step_log.save()
-                    # This safely generates EXP and creates the PendingStory tasks
+                    # Safely generates EXP and creates the PendingStory tasks
                     process_daily_steps(player, step_log)
                     self.stdout.write(self.style.SUCCESS(f"  + Success! Processed {real_steps} steps."))
                     success_count += 1

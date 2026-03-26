@@ -29,7 +29,7 @@ class FitService:
         service = build('fitness', 'v1', credentials=creds)
         now = datetime.datetime.utcnow()
         start_time = now - datetime.timedelta(days=1)
-        start_ns = int(start_time.timestamp() * 1e9)    # Convert to nanoseconds (required by Google Fit API)
+        start_ns = int(start_time.timestamp() * 1e9)    # Converted to nanoseconds (required by Google Fit API)
         end_ns = int(now.timestamp() * 1e9)
         dataset_id = f"{start_ns}-{end_ns}"
         response = service.users().dataset().aggregate(userId='me', body={

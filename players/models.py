@@ -18,7 +18,7 @@ class PlayerProfile(models.Model):
     google_token_uri = models.URLField(null=True, blank=True)
     google_client_id = models.TextField(null=True, blank=True)
     google_client_secret = models.TextField(null=True, blank=True)
-    # Narrative & Visual DNA (The fields Gemini needs)
+    # Narrative & Visual DNA
     current_location = models.CharField(
         max_length=255, 
         default="The Humble Village of Starting"
@@ -30,7 +30,6 @@ class PlayerProfile(models.Model):
         max_length=100,
         default="Greenleaf Kingdom"
     )
-    # A random number between 1 and 1000000 to keep the face consistent
     ai_seed = models.IntegerField(default=42)
 
     def __str__(self):
@@ -59,11 +58,11 @@ class Item(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     item_type = models.CharField(max_length=20, choices=ITEM_TYPES)
-    rarity = models.CharField(max_length=20, default="Common") # Common, Rare, Epic, Legendary
+    rarity = models.CharField(max_length=20, default="Common")
     # Stat Boosts
     hp_bonus = models.IntegerField(default=0)
     mana_bonus = models.IntegerField(default=0)
-    exp_multiplier = models.FloatField(default=1.0) # e.g., 1.1 for a 10% boost
+    exp_multiplier = models.FloatField(default=1.0)
     image_url = models.URLField(blank=True, null=True)
     
     def __str__(self):

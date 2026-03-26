@@ -42,11 +42,11 @@ def google_fit_callback(request):
 
 def test_isekai_trigger(request, player_id, steps):
     player = get_object_or_404(PlayerProfile, id=player_id)
-    # FIX: Check for today's log based ONLY on user and date
+    # Check for today's log based ONLY on user and date
     # Then update the steps if it's not processed yet
     step_log, created = DailyStepLog.objects.get_or_create(
         user=player.user,
-        date=date.today(), # Specifically target today
+        date=date.today(),                  # Specifically target today
         defaults={'steps': steps, 'is_processed': False}
     )
     if not created:
@@ -86,7 +86,7 @@ def sync_google_fit(request):
             defaults={'steps': real_steps, 'is_processed': False}
         )
         if not step_log.is_processed:
-            step_log.steps = real_steps # Update steps if refreshed
+            step_log.steps = real_steps             # Update steps if refreshed
             step_log.save()
             process_daily_steps(player, step_log)
             messages.success(request, f"Synced {real_steps} steps! Your legend grows.")
@@ -129,7 +129,6 @@ def sync_and_generate(request):
 def adventure_log(request):
     from collections import OrderedDict
     stories = DailyStory.objects.filter(player__user=request.user).order_by('date')
-    
     # Group stories into arcs by world_region
     arcs = OrderedDict()
     for story in stories:
@@ -141,7 +140,6 @@ def adventure_log(request):
                 'stories': [],
             }
         arcs[region]['stories'].append(story)
-    
     # Reverse the arcs so newest region comes first
     reversed_arcs = OrderedDict(reversed(list(arcs.items())))
     

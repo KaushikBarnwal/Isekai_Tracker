@@ -26,12 +26,10 @@ def dashboard(request):
     from tracker.models import DailyStepLog
     
     player = PlayerProfile.objects.get(user=request.user)
-    # Fetch all equipped items for this player
     equipped_list = InventoryItem.objects.filter(
         player=player, 
         is_equipped=True
     ).select_related('item')
-    # Organize into a dictionary for easy template access
     equipment = {
         'weapon': equipped_list.filter(item__item_type='WEAPON').first(),
         'armor': equipped_list.filter(item__item_type='ARMOR').first(),
@@ -69,13 +67,13 @@ def toggle_equip(request, inventory_id):
         # Ensure the user actually owns this specific item
         inv_item = get_object_or_404(InventoryItem, id=inventory_id, player=player)
         if inv_item.is_equipped:
-            inv_item.is_equipped = False                    # ACTION: Unequip the item
+            inv_item.is_equipped = False                    # Unequip the item
             player.hp = max(player.hp - inv_item.item.hp_bonus, 0)
             player.mana = max(player.mana - inv_item.item.mana_bonus, 0)
             inv_item.save()
         else:
-            # ACTION: Equip the new item
-            # First, find if they are already wearing an item of this type (e.g., another WEAPON)
+            # Equip the new item
+            # Find if they are already wearing an item of this type (like another weapon)
             currently_equipped = InventoryItem.objects.filter(
                 player=player, 
                 is_equipped=True, 
@@ -86,7 +84,7 @@ def toggle_equip(request, inventory_id):
                 player.hp = max(player.hp - old_item.item.hp_bonus, 0)
                 player.mana = max(player.mana - old_item.item.mana_bonus, 0)
                 old_item.save()
-            inv_item.is_equipped = True                     # Now, equip the new item and add its stats    
+            inv_item.is_equipped = True                     # Equiping the new item and add its stats    
             player.hp += inv_item.item.hp_bonus
             player.mana += inv_item.item.mana_bonus
             inv_item.save()

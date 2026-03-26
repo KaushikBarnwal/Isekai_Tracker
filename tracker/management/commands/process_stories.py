@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 if pending_story.found_item_name:
                     from players.models import Item
                     found_item = Item.objects.filter(name=pending_story.found_item_name).first()
-                generate_isekai_chapter(                # Call generator centrally and synchronously
+                generate_isekai_chapter(                    # Call generator centrally and synchronously
                     player_id=pending_story.player.id,
                     steps=pending_story.steps,
                     exp_gained=pending_story.exp_gained,
