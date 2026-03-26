@@ -1,6 +1,8 @@
 # import fal_client
 import re # For robust text parsing
 import random
+import logging
+import time
 from django.conf import settings
 # from google import genai
 # from google.genai import types
@@ -14,6 +16,12 @@ from .models import DailyStory
 # GEMINI_IMAGE_CLIENT = genai.Client(api_key=settings.GEMINI_IMAGE_API_KEY)
 GROQ_CLIENT = Groq(api_key=settings.GROQ_API_KEY)
 
+logger = logging.getLogger(__name__)
+
+# llama-3.1-8b-instant: ~10x faster than 70b, still produces quality stories.
+# Switch back to llama-3.3-70b-versatile if higher narrative quality is needed.
+GROQ_MODEL = "llama-3.1-8b-instant"
+
 # from openai import OpenAI
 # SF_CLIENT = OpenAI(
 #     api_key = settings.SILICONFLOW_API_KEY,
@@ -22,7 +30,7 @@ GROQ_CLIENT = Groq(api_key=settings.GROQ_API_KEY)
 
 # Added target_level to ensure delayed tasks write for the correct milestone
 def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_level=None, found_item=None, story_date=None):
-    print(f"--- DEBUG: Starting Story Gen for Player {player_id} ---")
+    logger.info("generate_isekai_chapter: starting for player_id=%s", player_id)
     player = PlayerProfile.objects.get(id=player_id)
     # Fetch Equipped Gear
     equipped_items = InventoryItem.objects.filter(player=player, is_equipped=True).select_related('item')
@@ -65,8 +73,8 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
     ACTION: [The action phrase]
     """
     
-    print("--- DEBUG: Calling Groq API ---")
-    # Using Llama 3.3 70B for high quality, or Llama 3 8B for extreme speed
+    logger.info("generate_isekai_chapter: calling Groq API (model=%s)", GROQ_MODEL)
+    t_groq = time.monotonic()
     try:
         chat_completion = GROQ_CLIENT.chat.completions.create(
             messages=[
@@ -79,13 +87,19 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
                     "content": narrative_prompt,
                 }
             ],
-            model="llama-3.3-70b-versatile",
+            model=GROQ_MODEL,
             temperature=0.7,
         )
         raw_text = chat_completion.choices[0].message.content
-        print(f"--- DEBUG: Groq Response: {raw_text[:50]}... ---")
+        logger.info(
+            "generate_isekai_chapter: Groq responded in %.2fs — preview: %.50s",
+            time.monotonic() - t_groq, raw_text,
+        )
     except Exception as e:
-        print(f"--- ERROR: Groq API Call failed: {e} ---")
+        logger.error(
+            "generate_isekai_chapter: Groq API call failed after %.2fs: %s",
+            time.monotonic() - t_groq, e,
+        )
         raw_text = f"STORY: The hero {player.user.username} pushed forward into the unknown. SUMMARY: The journey continues. ACTION: walking through the woods"
 
     # Text Parsing (Upgraded to Regex to prevent crashes)
@@ -102,7 +116,7 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
         if not story_match and len(raw_text) > 50:
              story_content = raw_text[:500] 
     except Exception as e:
-        print(f"--- ERROR: Parsing failed: {e} ---")
+        logger.error("generate_isekai_chapter: text parsing failed: %s", e)
         story_content = f"The hero {player.user.username} pushed forward into the unknown."
         summary_content = "The journey continues deeper into the world."
         current_action = "walking through a mysterious landscape"
@@ -114,7 +128,8 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
     dna_string = f"{player.visual_description}, wearing {gear_context}"
     prompt_text = f"{dna_string}, {current_action}, {player.current_location} background, anime style"
     
-    print("--- DEBUG: Calling Hugging Face API ---")
+    logger.info("generate_isekai_chapter: calling Hugging Face image API")
+    t_hf = time.monotonic()
     hf_token = settings.HUGGINGFACE_API_KEY
     # Using FLUX.1-schnell for fast, high-quality generation
     api_url = "https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell"
@@ -125,20 +140,31 @@ def generate_isekai_chapter(player_id, steps, exp_gained, leveled_up, target_lev
     try:
         response = requests.post(api_url, headers=headers, json=payload, timeout=60)
         if response.status_code == 200:
-            print("--- DEBUG: Hugging Face Success. Uploading to Cloudinary ---")
+            logger.info(
+                "generate_isekai_chapter: Hugging Face responded in %.2fs, uploading to Cloudinary",
+                time.monotonic() - t_hf,
+            )
             image_bytes = response.content
             # Upload to cloudinary
             upload_result = cloudinary.uploader.upload(
-                image_bytes, 
+                image_bytes,
                 folder="isekai_tracker/stories",
-                resource_type="image"
+                resource_type="image",
             )
             generated_image_url = upload_result.get("secure_url", "")
-            print(f"--- DEBUG: Cloudinary URL generated: {generated_image_url} ---")
+            logger.info(
+                "generate_isekai_chapter: Cloudinary upload complete — url=%s", generated_image_url
+            )
         else:
-            print(f"--- ERROR: Hugging Face failed: {response.status_code} {response.text} ---")
+            logger.error(
+                "generate_isekai_chapter: Hugging Face returned %s after %.2fs: %s",
+                response.status_code, time.monotonic() - t_hf, response.text,
+            )
     except Exception as e:
-        print(f"--- ERROR: Image pipeline failed: {e} ---")
+        logger.error(
+            "generate_isekai_chapter: image pipeline failed after %.2fs: %s",
+            time.monotonic() - t_hf, e,
+        )
 
     # 3: Saving to Database
     create_kwargs = dict(
