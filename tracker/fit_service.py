@@ -1,5 +1,6 @@
 import os
 import datetime
+from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
@@ -26,6 +27,11 @@ class FitService:
     def get_steps(credentials_dict):
         """Fetches steps for the last 24 hours."""
         creds = Credentials.from_authorized_user_info(credentials_dict, SCOPES)
+
+        if creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+            credentials_dict['token'] = creds.token
+
         service = build('fitness', 'v1', credentials=creds)
         now = datetime.datetime.utcnow()
         start_time = now - datetime.timedelta(days=1)
@@ -63,4 +69,4 @@ class FitService:
                                     for value in point['value']:
                                         if 'intVal' in value:
                                             total_steps += value['intVal']
-        return total_steps
+        return total_steps, credentials_dict
