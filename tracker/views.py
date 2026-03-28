@@ -81,8 +81,22 @@ def sync_google_fit(request):
         'client_id': player.google_client_id,
         'client_secret': player.google_client_secret,
     }
+    updated_creds = None
     try:                                            # 2. Fetch steps from Google Fit
-        real_steps = FitService.get_steps(creds_dict)
+        real_steps, updated_creds = FitService.get_steps(creds_dict)
+    except Exception as e:
+        print(f"Error syncing Fit: {e}")
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f"Connection to Google Fit lost ({str(e)}). Please re-link your account.")
+        return redirect('dashboard')
+
+    # 2a. Persist a refreshed access token immediately so subsequent syncs use the fresh token.
+    if updated_creds and updated_creds.get('token') != player.google_access_token:
+        player.google_access_token = updated_creds['token']
+        player.save(update_fields=['google_access_token'])
+
+    try:
         step_log, created = DailyStepLog.objects.get_or_create(
             user=request.user,
             date=date.today(),
