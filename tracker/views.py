@@ -34,11 +34,16 @@ def google_fit_callback(request):
     flow.fetch_token(authorization_response=request.build_absolute_uri())
     credentials = flow.credentials                     # Store credentials in the Database instead of session
     player = PlayerProfile.objects.get(user=request.user)
+    # Always update these from the new auth flow
     player.google_access_token = credentials.token
-    player.google_refresh_token = credentials.refresh_token
     player.google_token_uri = credentials.token_uri
     player.google_client_id = credentials.client_id
     player.google_client_secret = credentials.client_secret
+    # Only update refresh_token if it doesn't exist (first-time auth).
+    # On re-authentication Google issues a new refresh_token, but overwriting
+    # the existing one would break the cron job which relies on a stable token.
+    if not player.google_refresh_token:
+        player.google_refresh_token = credentials.refresh_token
     player.save()
     messages.success(request, "Google Fit connected successfully! 🎉 Your hero is now synced to the real world. 🌍")
     return redirect('dashboard')
