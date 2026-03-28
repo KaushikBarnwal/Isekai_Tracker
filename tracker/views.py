@@ -13,7 +13,10 @@ from .fit_service import FitService
 def google_fit_login(request):
     callback_url = request.build_absolute_uri(reverse('google_fit_callback'))
     flow = FitService.get_flow(redirect_uri=callback_url)
-    authorization_url, state = flow.authorization_url(prompt='consent')
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        prompt='consent'
+    )
     request.session['oauth_state'] = state
     request.session['code_verifier'] = flow.code_verifier
     return redirect(authorization_url)

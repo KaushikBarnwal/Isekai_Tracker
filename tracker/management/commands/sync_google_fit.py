@@ -33,13 +33,21 @@ class Command(BaseCommand):
                 'client_id': player.google_client_id,
                 'client_secret': player.google_client_secret,
             }
+            # 1. Fetch steps from FitService (pulls the last 24h by default)
             try:
-                # 1. Fetch steps from FitService (pulls the last 24h by default)
                 real_steps, updated_creds = FitService.get_steps(creds_dict)
                 # 1a. Persist a refreshed access token so the next sync doesn't fail
                 if updated_creds.get('token') != player.google_access_token:
                     player.google_access_token = updated_creds['token']
                     player.save(update_fields=['google_access_token'])
+            except Exception as e:
+                # Token expired/revoked — fall back to 0 steps so the player still gets a daily story
+                self.stdout.write(self.style.WARNING(
+                    f"  ⚠ Token error for {player.user.username}: {str(e)}. Falling back to 0 steps."
+                ))
+                real_steps = 0
+
+            try:
                 # 2. Get or Create the Log for yesterday
                 step_log, created = DailyStepLog.objects.get_or_create(
                     user=player.user,
