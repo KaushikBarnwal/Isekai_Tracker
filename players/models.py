@@ -9,8 +9,8 @@ class PlayerProfile(models.Model):
     # Stats
     level = models.PositiveIntegerField(default=1)
     exp = models.PositiveIntegerField(default=0)
-    hp = models.PositiveIntegerField(default=100)
-    mana = models.PositiveIntegerField(default=20)
+    base_hp = models.PositiveIntegerField(default=100)
+    base_mana = models.PositiveIntegerField(default=20)
     character_class = models.CharField(max_length=100, default="Novice")
     # OAuth Fields
     google_access_token = models.TextField(null=True, blank=True)
@@ -34,6 +34,16 @@ class PlayerProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - Level {self.level} {self.character_class} ({self.current_location}, {self.world_region})"
+
+    @property
+    def hp(self):
+        bonus = sum(inv.item.hp_bonus for inv in self.inventory.all() if inv.is_equipped)
+        return self.base_hp + bonus
+
+    @property
+    def mana(self):
+        bonus = sum(inv.item.mana_bonus for inv in self.inventory.all() if inv.is_equipped)
+        return self.base_mana + bonus
 
     @property
     def exp_to_next_level(self):

@@ -44,12 +44,23 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(
                     f"  ⚠ Token error for {player.user.username}: {str(e)}. Falling back to 0 steps."
                 ))
+                if 'invalid_grant' in str(e):
+                    player.google_access_token = None
+                    player.google_refresh_token = None
+                    player.save(update_fields=['google_access_token', 'google_refresh_token'])
                 real_steps = 0
 
             # 1a. Persist a refreshed access token only when get_steps() succeeded.
-            if updated_creds and updated_creds.get('token') != player.google_access_token:
-                player.google_access_token = updated_creds['token']
-                player.save(update_fields=['google_access_token'])
+            if updated_creds:
+                updated = False
+                if updated_creds.get('token') != player.google_access_token:
+                    player.google_access_token = updated_creds['token']
+                    updated = True
+                if updated_creds.get('refresh_token') and updated_creds.get('refresh_token') != player.google_refresh_token:
+                    player.google_refresh_token = updated_creds['refresh_token']
+                    updated = True
+                if updated:
+                    player.save(update_fields=['google_access_token', 'google_refresh_token'])
 
             # 2. Create / update the step log and run the story engine.
             try:

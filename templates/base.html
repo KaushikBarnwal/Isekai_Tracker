@@ -25,46 +25,50 @@
                 <!-- Logo -->
                 <div class="flex-shrink-0 flex items-center gap-2.5">
                     <span class="text-xl">⚔️</span>
-                    <a href="{% url 'dashboard' %}" class="font-rpg text-lg font-bold tracking-wide rpg-accent-text hover:brightness-125 transition-all duration-200">
+                    <a href="{% url 'dashboard' %}"
+                        class="font-rpg text-lg font-bold tracking-wide rpg-accent-text hover:brightness-125 transition-all duration-200">
                         Isekai Tracker
                     </a>
                 </div>
                 <!-- Links (Desktop) -->
                 <div class="hidden md:flex items-center gap-1">
                     {% url 'dashboard' as url_dashboard %}
-                    <a href="{{ url_dashboard }}" 
+                    <a href="{{ url_dashboard }}"
                         class="rpg-btn px-4 py-1.5 text-xs {% if request.path == url_dashboard %}rpg-accent-text border-2{% else %}rpg-muted border border-transparent hover:border-current{% endif %}"
-                        style="{% if request.path == url_dashboard %}background:var(--rpg-accent-dim);border-color:var(--rpg-accent);{% endif %}">
+                        {% if request.path == url_dashboard %}style="background:var(--rpg-accent-dim);border-color:var(--rpg-accent);" {% endif %}>
                         Stronghold
                     </a>
                     {% url 'inventory' as url_inventory %}
-                    <a href="{{ url_inventory }}" 
+                    <a href="{{ url_inventory }}"
                         class="rpg-btn px-4 py-1.5 text-xs {% if request.path == url_inventory %}text-emerald-400 border-2 border-emerald-500/40 bg-emerald-500/10{% else %}rpg-muted border border-transparent hover:border-current{% endif %}">
                         Inventory
                     </a>
                     {% url 'adventure_log' as url_adventure_log %}
-                    <a href="{{ url_adventure_log }}" 
+                    <a href="{{ url_adventure_log }}"
                         class="rpg-btn px-4 py-1.5 text-xs {% if request.path == url_adventure_log %}text-purple-400 border-2 border-purple-500/40 bg-purple-500/10{% else %}rpg-muted border border-transparent hover:border-current{% endif %}">
                         Chronicles
                     </a>
                     {% if user.is_authenticated %}
                     <form action="{% url 'logout' %}" method="post" class="inline ml-2">
                         {% csrf_token %}
-                        <button type="submit" class="rpg-btn px-3 py-1.5 text-xs text-rose-400 border border-transparent hover:border-rose-500/40 hover:bg-rose-500/10">
+                        <button type="submit"
+                            class="rpg-btn px-3 py-1.5 text-xs text-rose-400 border border-transparent hover:border-rose-500/40 hover:bg-rose-500/10">
                             Log Out
                         </button>
                     </form>
                     {% endif %}
 
                     <!-- Theme Toggle -->
-                    <button id="theme-toggle" class="theme-toggle ml-3" title="Toggle Theme" aria-label="Toggle dark/light theme">
+                    <button id="theme-toggle" class="theme-toggle ml-3" title="Toggle Theme"
+                        aria-label="Toggle dark/light theme">
                         <span id="theme-icon">🌙</span>
                     </button>
                 </div>
 
                 <!-- Mobile: Theme toggle + hamburger placeholder -->
                 <div class="md:hidden flex items-center gap-2">
-                    <button id="theme-toggle-mobile" class="theme-toggle" title="Toggle Theme" aria-label="Toggle dark/light theme">
+                    <button id="theme-toggle-mobile" class="theme-toggle" title="Toggle Theme"
+                        aria-label="Toggle dark/light theme">
                         <span id="theme-icon-mobile">🌙</span>
                     </button>
                 </div>
@@ -75,11 +79,15 @@
         <div class="md:hidden border-t" style="border-color: var(--rpg-border);">
             <div class="px-4 py-2 flex flex-wrap gap-1">
                 {% url 'dashboard' as url_dashboard %}
-                <a href="{{ url_dashboard }}" class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_dashboard %}rpg-accent-text{% else %}rpg-muted{% endif %}" {% if request.path == url_dashboard %}style="background:var(--rpg-accent-dim);border:1px solid var(--rpg-accent);"{% endif %}>Stronghold</a>
+                <a href="{{ url_dashboard }}"
+                    class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_dashboard %}rpg-accent-text{% else %}rpg-muted{% endif %}"
+                    {% if request.path == url_dashboard %}style="background:var(--rpg-accent-dim);border:1px solid var(--rpg-accent);" {% endif %}>Stronghold</a>
                 {% url 'inventory' as url_inventory %}
-                <a href="{{ url_inventory }}" class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_inventory %}text-emerald-400 border border-emerald-500/40 bg-emerald-500/10{% else %}rpg-muted{% endif %}">Inventory</a>
+                <a href="{{ url_inventory }}"
+                    class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_inventory %}text-emerald-400 border border-emerald-500/40 bg-emerald-500/10{% else %}rpg-muted{% endif %}">Inventory</a>
                 {% url 'adventure_log' as url_adventure_log %}
-                <a href="{{ url_adventure_log }}" class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_adventure_log %}text-purple-400 border border-purple-500/40 bg-purple-500/10{% else %}rpg-muted{% endif %}">Chronicles</a>
+                <a href="{{ url_adventure_log }}"
+                    class="rpg-btn px-3 py-1.5 text-xs {% if request.path == url_adventure_log %}text-purple-400 border border-purple-500/40 bg-purple-500/10{% else %}rpg-muted{% endif %}">Chronicles</a>
                 {% if user.is_authenticated %}
                 <form action="{% url 'logout' %}" method="post" class="inline">
                     {% csrf_token %}

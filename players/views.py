@@ -68,8 +68,6 @@ def toggle_equip(request, inventory_id):
         inv_item = get_object_or_404(InventoryItem, id=inventory_id, player=player)
         if inv_item.is_equipped:
             inv_item.is_equipped = False                    # Unequip the item
-            player.hp = max(player.hp - inv_item.item.hp_bonus, 0)
-            player.mana = max(player.mana - inv_item.item.mana_bonus, 0)
             inv_item.save()
         else:
             # Equip the new item
@@ -79,14 +77,10 @@ def toggle_equip(request, inventory_id):
                 is_equipped=True, 
                 item__item_type=inv_item.item.item_type
             )
-            for old_item in currently_equipped:             # Unequip the old item(s) and remove their stats
+            for old_item in currently_equipped:             # Unequip the old item(s)
                 old_item.is_equipped = False
-                player.hp = max(player.hp - old_item.item.hp_bonus, 0)
-                player.mana = max(player.mana - old_item.item.mana_bonus, 0)
                 old_item.save()
-            inv_item.is_equipped = True                     # Equiping the new item and add its stats    
-            player.hp += inv_item.item.hp_bonus
-            player.mana += inv_item.item.mana_bonus
+            inv_item.is_equipped = True                     # Equip the new item 
             inv_item.save()
         player.save()                                       # Save the player's new stats
     return redirect('inventory')                            # Refresh the page so the user sees the changes

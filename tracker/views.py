@@ -39,10 +39,9 @@ def google_fit_callback(request):
     player.google_token_uri = credentials.token_uri
     player.google_client_id = credentials.client_id
     player.google_client_secret = credentials.client_secret
-    # Only update refresh_token if it doesn't exist (first-time auth).
-    # On re-authentication Google issues a new refresh_token, but overwriting
-    # the existing one would break the cron job which relies on a stable token.
-    if not player.google_refresh_token:
+    # Always update refresh_token if provided by Google, as an expired token
+    # necessitates a fresh re-authentication.
+    if credentials.refresh_token:
         player.google_refresh_token = credentials.refresh_token
     player.save()
     messages.success(request, "Google Fit connected successfully! 🎉 Your hero is now synced to the real world. 🌍")
@@ -93,13 +92,24 @@ def sync_google_fit(request):
         print(f"Error syncing Fit: {e}")
         import traceback
         traceback.print_exc()
+        if 'invalid_grant' in str(e):
+            player.google_access_token = None
+            player.google_refresh_token = None
+            player.save(update_fields=['google_access_token', 'google_refresh_token'])
         messages.error(request, f"Connection to Google Fit lost ({str(e)}). Please re-link your account.")
         return redirect('dashboard')
 
     # 2a. Persist a refreshed access token immediately so subsequent syncs use the fresh token.
-    if updated_creds and updated_creds.get('token') != player.google_access_token:
-        player.google_access_token = updated_creds['token']
-        player.save(update_fields=['google_access_token'])
+    if updated_creds:
+        updated = False
+        if updated_creds.get('token') != player.google_access_token:
+            player.google_access_token = updated_creds['token']
+            updated = True
+        if updated_creds.get('refresh_token') and updated_creds.get('refresh_token') != player.google_refresh_token:
+            player.google_refresh_token = updated_creds['refresh_token']
+            updated = True
+        if updated:
+            player.save(update_fields=['google_access_token', 'google_refresh_token'])
 
     try:
         step_log, created = DailyStepLog.objects.get_or_create(

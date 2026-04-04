@@ -31,9 +31,10 @@ class FitService:
         if creds.expired and creds.refresh_token:
             creds.refresh(Request())
             credentials_dict['token'] = creds.token
+            credentials_dict['refresh_token'] = creds.refresh_token
 
         service = build('fitness', 'v1', credentials=creds)
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         start_time = now - datetime.timedelta(days=1)
         start_ns = int(start_time.timestamp() * 1e9)    # Converted to nanoseconds (required by Google Fit API)
         end_ns = int(now.timestamp() * 1e9)

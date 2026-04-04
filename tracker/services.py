@@ -68,7 +68,6 @@ def check_for_loot(player_profile, steps):
                         rarity=found_item.rarity,
                         template_id=3                       # Brevo Template ID
                     )
-                return found_item
 
     return best_item
 
@@ -106,8 +105,8 @@ def process_daily_steps(player_profile, step_log):
             # Level Up
             player_profile.exp -= req_exp
             player_profile.level += 1
-            player_profile.hp += 10
-            player_profile.mana += 2
+            player_profile.base_hp += 10
+            player_profile.base_mana += 2
             any_level_up_occurred = True
             # Check for New Regions
             if player_profile.level in WORLD_REGIONS:
