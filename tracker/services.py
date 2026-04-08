@@ -121,6 +121,9 @@ def process_daily_steps(player_profile, step_log):
             print(f"--- ✨ Level Up! Now Level {player_profile.level}. Queuing Chapter... ---")
         else:
             break
+    # Save to DB before creating PendingStory
+    player_profile.refresh_from_db()
+
     # 4. Check for Loot
     found_item = check_for_loot(player_profile, step_log.steps)
     found_item_name = found_item.name if found_item else None
