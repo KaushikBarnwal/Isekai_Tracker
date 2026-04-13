@@ -21,6 +21,24 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("No connected players found."))
             return
 
+        # --- Duplicate-run guard ---
+        # Railway can occasionally trigger the cron twice
+        # (e.g. on container restart / retry). We use a DB-level atomic check:
+        # if ANY player already has a processed log for target_date that was
+        # created by the cron (step count > 0 OR is_processed=True), we bail early.
+        # This prevents double-processing EXP and duplicate stories.
+        already_done = DailyStepLog.objects.filter(
+            date=target_date,
+            is_processed=True
+        ).exists()
+        if already_done:
+            self.stdout.write(self.style.WARNING(
+                f"⚠ Duplicate run detected: {target_date} was already fully processed "
+                f"by a previous cron execution. Exiting to prevent double-processing."
+            ))
+            self.stdout.write(f"\nSync Complete! Success: 0, Errors: 0 (duplicate run skipped)")
+            return
+
         success_count = 0
         error_count = 0
 
@@ -78,7 +96,12 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(f"  + Success! Processed {real_steps} steps."))
                     success_count += 1
                 else:
-                    self.stdout.write(f"  - Skipped: {target_date} was already processed manually.")
+                    # This should not normally be reached since the duplicate-run guard
+                    # above catches the case where all players are already processed.
+                    # If we get here, it means only THIS specific player was pre-processed.
+                    self.stdout.write(self.style.WARNING(
+                        f"  - Skipped {player.user.username}: {target_date} log already has is_processed=True."
+                    ))
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f"  x Error for {player.user.username}: {str(e)}"))
                 error_count += 1

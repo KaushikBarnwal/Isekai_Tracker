@@ -112,16 +112,20 @@ def sync_google_fit(request):
             player.save(update_fields=['google_access_token', 'google_refresh_token'])
 
     try:
+        # Only store the live step snapshot for today — DO NOT process rewards/stories here.
+        # The midnight cron job (sync_google_fit) is responsible for processing EXP, leveling,
+        # and story generation. It targets yesterday's log (today - 1 day). If we call
+        # process_daily_steps() here it marks is_processed=True for today, and the cron
+        # will find that same record tomorrow and skip it, causing the daily sync to silently fail.
         step_log, created = DailyStepLog.objects.get_or_create(
             user=request.user,
             date=date.today(),
             defaults={'steps': real_steps, 'is_processed': False}
         )
         if not step_log.is_processed:
-            step_log.steps = real_steps             # Update steps if refreshed
+            step_log.steps = real_steps             # Refresh live step count
             step_log.save()
-            process_daily_steps(player, step_log)
-            messages.success(request, f"Synced {real_steps} steps! Your legend grows.")
+            messages.success(request, f"Synced {real_steps} steps! The cron will process your rewards at midnight. ⚔️")
         else:
             messages.info(request, "Today's deeds are already written in the stars.")
             
