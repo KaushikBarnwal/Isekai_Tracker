@@ -16,7 +16,7 @@
 - **Python & Django (6.0)**: Core web framework and database ORM.
 - **PostgreSQL**: Production database.
 - **Google Cloud APIs**: For Google OAuth and Google Fit data retrieval.
-- **Celery / Cron (Railway)**: For executing automated tasks securely.
+- **Celery / Cron Job**: For executing automated tasks securely.
 - **Brevo API**: For sending Epic/Legendary loot transactional email alerts.
 
 ### AI & Media Pipelines
@@ -40,14 +40,14 @@
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/yourusername/Isekai_Tracker.git
+   git clone https://github.com/KaushikBarnwal/Isekai_Tracker.git
    cd Isekai_Tracker
    ```
 
 2. **Set up Python Virtual Environment:**
    ```bash
    python -m venv env
-   source env/bin/activate  # On Windows: env\Scripts\activate
+   env\Scripts\activate  # On iOS: source env/bin/activate
    ```
 
 3. **Install Dependencies:**
