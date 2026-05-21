@@ -60,7 +60,9 @@ if csrf_origins:
     CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',')]
 else:
     # Default fallback so the site works on the original Railway URL
-    CSRF_TRUSTED_ORIGINS = ['https://web-production-a1e4b.up.railway.app']
+    # CSRF_TRUSTED_ORIGINS = ['https://web-production-a1e4b.up.railway.app']
+    CSRF_TRUSTED_ORIGINS = ['https://isekai-tracker.up.railway.app']
+
 
 # This tells Django to trust the 'https' header sent by Railway
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
