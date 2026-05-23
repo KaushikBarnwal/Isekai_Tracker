@@ -21,15 +21,16 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 BREVO_API_KEY = os.getenv("BREVO_API_KEY", "").strip()
 
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY", "").strip()
+CRON_SECRET_KEY = os.getenv("CRON_SECRET_KEY", "my-super-secret-cron-key-12345")
 
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
 cloudinary.config(
-  cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME", ""),
-  api_key = os.getenv("CLOUDINARY_API_KEY", ""),
-  api_secret = os.getenv("CLOUDINARY_API_SECRET", "")
+    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME", ""),
+    api_key = os.getenv("CLOUDINARY_API_KEY", ""),
+    api_secret = os.getenv("CLOUDINARY_API_SECRET", "")
 )
 
 

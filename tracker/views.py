@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
+from django.core.management import call_command
 from players.models import PlayerProfile
 from .models import DailyStepLog
 from quests.models import DailyStory
@@ -160,7 +161,7 @@ def sync_and_generate(request):
         if player.current_location != old_location:
             messages.success(request, f"🗺️ NEW REGION UNLOCKED: Welcome to {player.current_location}!")
     return redirect('dashboard')
-    
+
 @login_required
 def adventure_log(request):
     from collections import OrderedDict
@@ -178,5 +179,18 @@ def adventure_log(request):
         arcs[region]['stories'].append(story)
     # Reverse the arcs so newest region comes first
     reversed_arcs = OrderedDict(reversed(list(arcs.items())))
-    
     return render(request, 'tracker/adventure_log.html', {'arcs': reversed_arcs})
+
+def trigger_cron(request, command_name):
+    from django.conf import settings
+    provided_key = request.GET.get('key')
+    if provided_key != settings.CRON_SECRET_KEY:
+        return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
+    allowed_commands = ['sync_google_fit', 'process_stories']
+    if command_name not in allowed_commands:
+        return JsonResponse({"status": "error", "message": "Invalid command"}, status=400)
+    try:
+        call_command(command_name)
+        return JsonResponse({"status": "success", "message": f"Successfully ran {command_name}"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)

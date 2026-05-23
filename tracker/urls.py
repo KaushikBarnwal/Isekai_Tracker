@@ -9,4 +9,6 @@ urlpatterns = [
     path('chronicles/', views.adventure_log, name='adventure_log'),
     # Test Trigger (keep for debugging)
     path('test/<int:player_id>/<int:steps>/', views.test_isekai_trigger, name='test_trigger'),
+    # Cron-Job.org endpoint
+    path('cron/<str:command_name>/', views.trigger_cron, name='trigger_cron'),
 ]
