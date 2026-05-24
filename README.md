@@ -60,13 +60,16 @@
    Create a `.env` file in the root directory and populate it with:
    ```env
    # Django Secrets
-   SECRET_KEY=your_secret_key
+   CRON_SECRET_KEY=your_cron_secret_key
    DEBUG=True
 
    # APIs
    GROQ_API_KEY=your_groq_key
    HUGGINGFACE_API_KEY=your_hf_key
-   CLOUDINARY_URL=your_cloudinary_url
+   CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+   CLOUDINARY_API_SECRET=your_cloudinary_secret_key
+   CLOUDINARY_API_KEY=your_cloudinary_key
+   BREVO_API_KEY=your_brevo_key
 
    # Google Fit Auth
    GOOGLE_CLIENT_ID=your_client_id
