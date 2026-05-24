@@ -37,9 +37,6 @@ def google_fit_callback(request):
     player = PlayerProfile.objects.get(user=request.user)
     # Always update these from the new auth flow
     player.google_access_token = credentials.token
-    player.google_token_uri = credentials.token_uri
-    player.google_client_id = credentials.client_id
-    player.google_client_secret = credentials.client_secret
     # Always update refresh_token if provided by Google, as an expired token
     # necessitates a fresh re-authentication.
     if credentials.refresh_token:
@@ -79,12 +76,13 @@ def sync_google_fit(request):
     player = PlayerProfile.objects.get(user=request.user)
     if not player.google_refresh_token:
         return redirect('google_fit_login')
+    import os
     creds_dict = {                                  # 1. Prepare credentials from the database
         'token': player.google_access_token,
         'refresh_token': player.google_refresh_token,
-        'token_uri': player.google_token_uri,
-        'client_id': player.google_client_id,
-        'client_secret': player.google_client_secret,
+        'token_uri': "https://oauth2.googleapis.com/token",
+        'client_id': os.getenv('GOOGLE_CLIENT_ID'),
+        'client_secret': os.getenv('GOOGLE_CLIENT_SECRET'),
     }
     updated_creds = None
     try:                                            # 2. Fetch steps from Google Fit
@@ -144,9 +142,6 @@ def unsync_google_fit(request):
     player = PlayerProfile.objects.get(user=request.user)
     player.google_access_token = None
     player.google_refresh_token = None
-    player.google_token_uri = None
-    player.google_client_id = None
-    player.google_client_secret = None
     player.save()
     messages.success(request, "Google Fit disconnected successfully. Take a rest, hero!")
     return redirect('dashboard')

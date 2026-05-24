@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib import messages
+from .fields import EncryptedTextField
 
 # Create your models here.
 class PlayerProfile(models.Model):
@@ -13,11 +14,8 @@ class PlayerProfile(models.Model):
     base_mana = models.PositiveIntegerField(default=20)
     character_class = models.CharField(max_length=100, default="Novice")
     # OAuth Fields
-    google_access_token = models.TextField(null=True, blank=True)
-    google_refresh_token = models.TextField(null=True, blank=True)
-    google_token_uri = models.URLField(null=True, blank=True)
-    google_client_id = models.TextField(null=True, blank=True)
-    google_client_secret = models.TextField(null=True, blank=True)
+    google_access_token = EncryptedTextField(null=True, blank=True)
+    google_refresh_token = EncryptedTextField(null=True, blank=True)
     # Narrative & Visual DNA
     current_location = models.CharField(
         max_length=255, 

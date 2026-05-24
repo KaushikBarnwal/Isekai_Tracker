@@ -44,12 +44,13 @@ class Command(BaseCommand):
 
         for player in connected_players:
             self.stdout.write(f"Syncing player: {player.user.username}")
+            import os
             creds_dict = {
                 'token': player.google_access_token,
                 'refresh_token': player.google_refresh_token,
-                'token_uri': player.google_token_uri,
-                'client_id': player.google_client_id,
-                'client_secret': player.google_client_secret,
+                'token_uri': "https://oauth2.googleapis.com/token",
+                'client_id': os.getenv('GOOGLE_CLIENT_ID'),
+                'client_secret': os.getenv('GOOGLE_CLIENT_SECRET'),
             }
             # 1. Fetch steps from Google Fit and unpack the (steps, creds) tuple.
             #    Token refresh and unpacking are isolated here so a failure never
