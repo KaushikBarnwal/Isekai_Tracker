@@ -34,7 +34,7 @@ def google_fit_callback(request):
         flow.code_verifier = code_verifier
     flow.fetch_token(authorization_response=request.build_absolute_uri())
     credentials = flow.credentials                     # Store credentials in the Database instead of session
-    player = PlayerProfile.objects.get(user=request.user)
+    player, _ = PlayerProfile.objects.get_or_create(user=request.user)
     # Always update these from the new auth flow
     player.google_access_token = credentials.token
     # Always update refresh_token if provided by Google, as an expired token
@@ -73,7 +73,7 @@ def test_isekai_trigger(request, player_id, steps):
 
 @login_required
 def sync_google_fit(request):
-    player = PlayerProfile.objects.get(user=request.user)
+    player, _ = PlayerProfile.objects.get_or_create(user=request.user)
     if not player.google_refresh_token:
         return redirect('google_fit_login')
     import os
@@ -139,7 +139,7 @@ def sync_google_fit(request):
 
 @login_required
 def unsync_google_fit(request):
-    player = PlayerProfile.objects.get(user=request.user)
+    player, _ = PlayerProfile.objects.get_or_create(user=request.user)
     player.google_access_token = None
     player.google_refresh_token = None
     player.save()
@@ -148,7 +148,7 @@ def unsync_google_fit(request):
 
 @login_required
 def sync_and_generate(request):
-    player = PlayerProfile.objects.get(user=request.user)
+    player, _ = PlayerProfile.objects.get_or_create(user=request.user)
     old_location = player.current_location
     latest_log = DailyStepLog.objects.filter(user=player.user, is_processed=False).last()
     if latest_log:

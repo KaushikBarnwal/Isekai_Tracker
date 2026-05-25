@@ -25,7 +25,7 @@ def dashboard(request):
     from datetime import date
     from tracker.models import DailyStepLog
     
-    player = PlayerProfile.objects.get(user=request.user)
+    player, _ = PlayerProfile.objects.get_or_create(user=request.user)
     equipped_list = InventoryItem.objects.filter(
         player=player, 
         is_equipped=True
@@ -51,7 +51,7 @@ def dashboard(request):
 
 @login_required
 def inventory_page(request):
-    player = PlayerProfile.objects.get(user=request.user)
+    player, _ = PlayerProfile.objects.get_or_create(user=request.user)
     # Fetch all items owned by the player, ordered by newest first, optimized with select_related
     inventory = InventoryItem.objects.filter(player=player).select_related('item').order_by('-acquired_at')
     context = {
@@ -63,7 +63,7 @@ def inventory_page(request):
 @login_required
 def toggle_equip(request, inventory_id):
     if request.method == 'POST':
-        player = PlayerProfile.objects.get(user=request.user)
+        player, _ = PlayerProfile.objects.get_or_create(user=request.user)
         # Ensure the user actually owns this specific item
         inv_item = get_object_or_404(InventoryItem, id=inventory_id, player=player)
         if inv_item.is_equipped:
