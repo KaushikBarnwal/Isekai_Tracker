@@ -137,7 +137,7 @@ def process_daily_steps(player_profile, step_log):
             PendingStory.objects.create(
                 player=player_profile,
                 steps=step_log.steps,
-                exp_gained=total_exp_gained,
+                exp_gained=total_exp_gained if index == 0 else 0,
                 leveled_up=True,
                 target_level=lv,
                 story_date=story_date,
