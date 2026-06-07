@@ -13,24 +13,28 @@
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **Python & Django (6.0)**: Core web framework and database ORM.
 - **PostgreSQL**: Production database.
 - **Google Cloud APIs**: For Google OAuth and Google Fit data retrieval.
-- **Celery / Cron Job**: For executing automated tasks securely.
+- **Cron-jobs.org**: 3 automated cron jobs hitting secured Django endpoints for hands-free daily processing.
 - **Brevo API**: For sending Epic/Legendary loot transactional email alerts.
 
 ### AI & Media Pipelines
-- **Groq (Llama 3) LLM**: Auto-generates personalized daily Isekai story chapters.
+
+- **Groq (Llama 3.1 8B Instant)**: Auto-generates personalized daily Isekai story chapters with memory chaining.
 - **Hugging Face (FLUX.1)**: Image model for generating AI-illustrated scenes.
 - **Cloudinary**: Cloud storage and CDN for hosting generated images.
 
 ### Frontend
+
 - **HTML & Django Templates**: Backend-rendered pages.
 - **Tailwind CSS v4**: Utility-first styling for a sleek, responsive interface.
 
 ## 🚀 Setup & Installation
 
 ### Prerequisites
+
 - Python 3.10+
 - Node.js (for Tailwind CSS)
 - A Google Cloud Console project with the Fit API enabled.
@@ -39,18 +43,21 @@
 ### Local Environment Setup
 
 1. **Clone the repo:**
+
    ```bash
    git clone https://github.com/KaushikBarnwal/Isekai_Tracker.git
    cd Isekai_Tracker
    ```
 
 2. **Set up Python Virtual Environment:**
+
    ```bash
    python -m venv env
-   env\Scripts\activate  # On iOS: source env/bin/activate
+   env\Scripts\activate  # On macOS/Linux: source env/bin/activate
    ```
 
 3. **Install Dependencies:**
+
    ```bash
    pip install -r requirements.txt
    npm install
@@ -58,6 +65,7 @@
 
 4. **Environment Variables:**
    Create a `.env` file in the root directory and populate it with:
+
    ```env
    # Django Secrets
    CRON_SECRET_KEY=your_cron_secret_key
@@ -77,12 +85,14 @@
    ```
 
 5. **Run Migrations:**
+
    ```bash
    python manage.py migrate
    ```
 
 6. **Start the Development Servers:**
    You will need to run both the Django server and the Tailwind CSS watcher:
+
    ```bash
    # Terminal 1: Django
    python manage.py runserver
@@ -97,6 +107,40 @@
 2. **Define Your Avatar**: Set up your character's DNA, appearance, and starting gear.
 3. **Walk!**: Go about your everyday routine.
 4. **Read Your Story**: Check the app the next day (or trigger a sync) to read the new chapter of your adventure based on yesterday's step count, complete with AI-generated art!
+
+## 📐 Architecture
+
+```mermaid
+graph TD
+    A["🚶 Player Walks"] --> B["📱 Google Fit API"]
+    B --> C["⏰ Cron Job 1: sync_google_fit<br/>(Midnight)"]
+    C --> D["⚙️ Game Engine<br/>process_daily_steps()"]
+    D --> E["📊 EXP + Level Up"]
+    D --> F["🎲 Loot Roll<br/>check_for_loot()"]
+    D --> G["📝 PendingStory Queue"]
+    F -->|"Epic/Legendary"| H["📧 Brevo Email Alert"]
+    G --> I["⏰ Cron Job 2: process_stories<br/>(Every 15 min)"]
+    I --> J["🤖 Groq LLM<br/>Story Text"]
+    J --> K["🎨 Hugging Face<br/>Scene Image"]
+    K --> L["☁️ Cloudinary<br/>URL Storage"]
+    L --> M["📖 Adventure Log<br/>DailyStory"]
+    E --> N["🗺️ Region Unlock<br/>WORLD_REGIONS"]
+```
+
+> For a deep dive into the game engine, AI pipeline, loot system, and cron architecture, see [Plan.md](./Plan.md).
+
+## 🧠 Engineering Highlights
+
+- **100,000× storage reduction**: Storing Cloudinary URLs (~0.02 KB) instead of raw image blobs (~2 MB) per story.
+- **Encrypted OAuth tokens**: Google refresh tokens encrypted at rest using Fernet symmetric encryption derived from Django's `SECRET_KEY`.
+- **Memory-chained storytelling**: Each day's AI-generated summary feeds into the next day's prompt, creating a continuous novel-like narrative.
+- **Duplicate-run guard**: Cron jobs detect and skip re-runs to prevent double-processing.
+
+## 🗺️ Future Roadmap
+
+- **Active Mission System**: Morning emails with a 55% chance of spawning an enemy — walk 8K/10K/12K steps to defeat it, or take an HP penalty.
+- **Multiplayer Guild System**: Form parties and tackle co-op boss encounters.
+- **Achievement Badges**: Milestone rewards for step streaks, rare loot, and region completions.
 
 ## 📜 License
 
