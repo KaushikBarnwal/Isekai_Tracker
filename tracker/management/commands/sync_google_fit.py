@@ -21,23 +21,12 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("No connected players found."))
             return
 
-        # --- Duplicate-run guard ---
-        # Railway can occasionally trigger the cron twice
-        # (e.g. on container restart / retry). We use a DB-level atomic check:
-        # if ANY player already has a processed log for target_date that was
-        # created by the cron (step count > 0 OR is_processed=True), we bail early.
-        # This prevents double-processing EXP and duplicate stories.
-        already_done = DailyStepLog.objects.filter(
-            date=target_date,
-            is_processed=True
-        ).exists()
-        if already_done:
-            self.stdout.write(self.style.WARNING(
-                f"⚠ Duplicate run detected: {target_date} was already fully processed "
-                f"by a previous cron execution. Exiting to prevent double-processing."
-            ))
-            self.stdout.write(f"\nSync Complete! Success: 0, Errors: 0 (duplicate run skipped)")
-            return
+        # --- Duplicate-run guard (per-player) ---
+        # The per-player `is_processed` check inside the loop (line ~75) already
+        # prevents double-processing for each individual player. A global guard
+        # here was causing a critical bug: if ANY player had a processed log
+        # for target_date (e.g. from a manual sync_and_generate call), the cron
+        # would skip ALL players entirely, freezing EXP progression.
 
         success_count = 0
         error_count = 0
@@ -97,9 +86,8 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(f"  + Success! Processed {real_steps} steps."))
                     success_count += 1
                 else:
-                    # This should not normally be reached since the duplicate-run guard
-                    # above catches the case where all players are already processed.
-                    # If we get here, it means only THIS specific player was pre-processed.
+                    # Already processed (e.g. by a prior cron run or manual sync_and_generate).
+                    # Per-player guard ensures no double-processing.
                     self.stdout.write(self.style.WARNING(
                         f"  - Skipped {player.user.username}: {target_date} log already has is_processed=True."
                     ))

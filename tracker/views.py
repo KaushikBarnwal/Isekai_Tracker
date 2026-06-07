@@ -181,7 +181,7 @@ def trigger_cron(request, command_name):
     provided_key = request.GET.get('key')
     if provided_key != settings.CRON_SECRET_KEY:
         return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
-    allowed_commands = ['sync_google_fit', 'process_stories', 'seed_items']
+    allowed_commands = ['sync_google_fit', 'process_stories', 'seed_items', 'recover_missed_days']
     if command_name not in allowed_commands:
         return JsonResponse({"status": "error", "message": "Invalid command"}, status=400)
     try:
